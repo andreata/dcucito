@@ -1702,4 +1702,4 @@ function site_ver_header_metadata() {
 add_action( 'wp_head', 'site_ver_header_metadata' );
 
 
-
+// implementazione git
