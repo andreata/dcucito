@@ -1393,7 +1393,7 @@ function bbloomer_translate_may_also_like() {
 }
 
 // Set quantity for gruped product
-add_filter( 'woocommerce_quantity_input_args', 'custom_quantity', 10, 2 );
+//add_filter( 'woocommerce_quantity_input_args', 'custom_quantity', 10, 2 );
 function custom_quantity( $args, $product ) {
     $args['input_value'] = 1;
     return $args;
@@ -1404,6 +1404,65 @@ function woocommerce_subcats_from_parentcat_by_ID($parent_cat_ID) {
 	if (!is_shop()) {
 		$category = get_queried_object();
 		$ac_cat = $category->term_id;
+
+	
+            $cat_desc = term_description( $ac_cat, 'product_cat' );
+			
+$input = str_replace('</P>', '</p>', $cat_desc); # In case of upper case tags
+list($first, $next) = explode('</p>', $input, 2);
+$first .= '</p>';
+
+
+
+			$term_name = get_term( $ac_cat )->name;
+			echo '<style>#myAccordionDcucito {cursor: pointer; cursor: hand;margin-top: -25px;display: block; margin-bottom: 30px;    background: #eeece3;
+    width: fit-content;
+    font-weight: 900;
+    padding: 1px 10px;}#more {display: none;margin-top: -25px;}.archive-description {display: none;}</style><h1>'. $term_name .'</h1>';
+
+            $descrip = '<span class="subtitle">'.$cat_desc.'</span>';
+        
+			
+			if (strlen($cat_desc) < 600) {
+				?> <div class="dropdown-container">
+					<?php echo $cat_desc; ?>
+				</div> 
+			<?php }
+			elseif (strlen($cat_desc) > 600) { ?>
+				<div class="dropdown-container">
+					<header class="clearfix">
+						<div><?php echo $first ?><div id="dots"></div> 
+						<div id="more"><?php echo $next ?></div>
+						</div>
+						<div onclick="myFunction()" id="myAccordionDcucito"><?php echo __( 'Continua a leggere', 'dcucito' ); ?></div>
+					
+					
+					</header>
+				
+				</div>
+
+				<script>
+					function myFunction() {
+					var dots = document.getElementById("dots");
+					var moreText = document.getElementById("more");
+					var btnText = document.getElementById("myAccordionDcucito");
+
+					if (dots.style.display === "none") {
+						dots.style.display = "inline";
+						btnText.innerHTML = "Continua a leggere"; 
+						moreText.style.display = "none";
+					} else {
+						dots.style.display = "none";
+						btnText.innerHTML = "Leggi meno"; 
+						moreText.style.display = "block";
+					}
+					}
+				</script>
+
+			<?php } else {
+
+			}
+
 		$args = array(
 		'hierarchical' => 1,
 		'show_option_none' => '',
@@ -1618,9 +1677,11 @@ function coupon_accotun_page() { ?>
 	<h4>⚠️Utilizza questo coupon sul tuo primo acquisto per risparmiare subito il 10%!</h4>
 	<h4 class="coupon-style">BENVENUTA10</h4>
 							<hr>
-	<h4>&#x1F381; In omaggio per te il 1°numero del Magazine di Dottor Cucito <a target="_blank" title="magazine dottor cucito" style="text-decoration: underline;" href="https://dottorcucito.it/wp-content/themes/dcucito/magazine/Dottor_Cucito_Magazine_1_ottobre%202020.pdf">Clicca qui per scaricare</a></h4>
+	<h4>&#x1F381; In omaggio per te il 1° numero del Magazine di Dottor Cucito <a target="_blank" title="magazine dottor cucito" style="text-decoration: underline;" href="https://dottorcucito.it/wp-content/themes/dcucito/magazine/Dottor_Cucito_Magazine_1_ottobre%202020.pdf">Clicca qui per scaricare</a></h4>
 	
-<h4>&#x1F381; In omaggio per te il 2°numero del Magazine di Dottor Cucito <a target="_blank" title="magazine dottor cucito" style="text-decoration: underline;" href="https://dottorcucito.it/wp-content/uploads/magazine/dottorcucito-magazine-2-gennaio-marzo-2021.pdf">Clicca qui per scaricare</a></h4>
+<h4>&#x1F381; In omaggio per te il 2° numero del Magazine di Dottor Cucito <a target="_blank" title="magazine dottor cucito" style="text-decoration: underline;" href="https://dottorcucito.it/wp-content/uploads/magazine/dottorcucito-magazine-2-gennaio-marzo-2021.pdf">Clicca qui per scaricare</a></h4>
+
+<h4>&#x1F381; In omaggio per te il 3° numero del Magazine di Dottor Cucito <a target="_blank" title="magazine dottor cucito" style="text-decoration: underline;" href="https://dottorcucito.it/wp-content/uploads/magazine/dottorcucito_magazine_3_aprile_2021.pdf">Clicca qui per scaricare</a></h4>
 	
 <?php }
 
@@ -1703,3 +1764,49 @@ add_action( 'wp_head', 'site_ver_header_metadata' );
 
 
 // implementazione git
+
+function so_31423071_remove_archive_description(){
+    remove_action( 'genesis_before_loop', 'genesis_do_taxonomy_title_description', 15 );
+}
+add_action( 'woocommerce_archive_description', 'so_31423071_remove_archive_description' );
+ //add_action( 'woocommerce_archive_description', 'wc_category_description' );
+    function wc_category_description() {
+        if ( is_product_category() ) {
+            global $wp_query;
+            $cat_id = $wp_query->get_queried_object_id();
+            $cat_desc = term_description( $cat_id, 'product_cat' );
+            $subtit = '<span class="subtitle">'.$cat_desc.'</span>';
+            echo $subtit;
+        }
+    }
+
+// remove price from google structured data onlyinfoTrue
+add_filter( 'woocommerce_structured_data_product', function( $markup ) {
+	
+	$infoRadio = rwmb_meta( 'radioinfo' );
+
+	global $current_user; 
+	wp_get_current_user(); 
+ 
+	if ($infoRadio == "onlyinfoTrue")  {
+        $markup['offers'] = null;
+	}
+	return $markup;
+	
+}); 
+
+// remove price from product onlyinfoTrue and no logged in
+add_filter('raw_woocommerce_price', function($price) {
+	$infoRadio = rwmb_meta( 'radioinfo' );
+
+	global $current_user; 
+	wp_get_current_user(); 
+ 
+	if ($infoRadio == "onlyinfoTrue" &&  !(is_user_logged_in()))  {
+		return 0;
+	}
+	return $price;
+}); 
+
+
+
